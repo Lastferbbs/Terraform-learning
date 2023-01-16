@@ -9,24 +9,27 @@ resource "aws_instance" "example" {
   vpc_security_group_ids = [aws_security_group.instance.id]
 
   user_data = <<-EOF
-	      #!/bin/bash
-	      echo "Hello, World" > index.xhtml
-	      nohup busybox httpd -f -p 8080 &
-	      EOF
-
-  user_data_replace_on_change = true
+              #!/bin/bash
+              echo "Hello, World" > index.html
+              nohup busybox httpd -f -p ${var.server_port} &
+              EOF
 
   tags = {
     Name = "terraform-example"
   }
 }
 
+# ---------------------------------------------------------------------------------------------------------------------
+# CREATE THE SECURITY GROUP THAT'S APPLIED TO THE EC2 INSTANCE
+# ---------------------------------------------------------------------------------------------------------------------
+
 resource "aws_security_group" "instance" {
   name = "terraform-example-instance"
 
+  # Inbound HTTP from anywhere
   ingress {
-    from_port   = 8080
-    to_port     = 8080
+    from_port   = var.server_port 
+    to_port     = var.server_port
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }
